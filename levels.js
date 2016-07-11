@@ -40,6 +40,11 @@ var maps = [
      new Displayable({
           image: "assets/map2.png",
           mask: ["0, 0, 0"]
+     }),
+
+     new Displayable({
+          image: "assets/map3.png",
+          mask: ["0, 0, 0"]
      })
 
      //todo more maps
@@ -50,7 +55,7 @@ var jet = new Displayable({
      image: "assets/jet.png",
      mask: ["0, 0, 0"],
      x: 70,
-     y: 200, 
+     y: 340, 
      v: 0,
      theta: 0
 })
@@ -150,7 +155,7 @@ for(var i = 0; i < maps.length; i++) {
 
 
 
-                    if(jet.collidesWith(map)) {
+                    if(jet.collidesWith(map) || jet.x <= 30) {
                          alert("bang")
 
                          ScrManager.setScr(thisScr)

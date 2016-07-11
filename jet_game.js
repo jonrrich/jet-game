@@ -79,7 +79,11 @@
                     if(keyCode >= 49 && keyCode <= 57) {
                          //LVL 1-9
 
-                         ScrManager.setScr("load_L-" + (keyCode - 48))
+                         var lvl = keyCode - 48
+
+                         if(lvl >= 4) alert("level " + lvl + " has not been implemented yet.")
+
+                         ScrManager.setScr("load_L-" + lvl)
                     }
 
                     else if(keyCode === 88) {
