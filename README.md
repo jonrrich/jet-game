@@ -3,6 +3,18 @@
 
 *Note: this is very much a work in progress.*
 
+## Running
+
+Clone the files to your local machine.
+
+Then, run an HTTP server on the directory that holds the files. 
+
+For example, you could use python 3 and run <br>
+`cd <YOUR DIRECTORY>` followed by <br>
+`python -m http.server <PORT>`
+
+Open a browser and navigate to `localhost:<PORT>/jet_game.html`
+
 ## Objective
 
 Guide your jet towards the right of the screen to complete each level without hitting the obstacles.
