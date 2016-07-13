@@ -30,47 +30,75 @@ function renderLoading (ctx, time) {
 }
 
 
-var maps = [
 
-     new Displayable({
-          image: "assets/map1.png",
-          mask: ["0, 0, 0"]
-     }),
+var levelData = [
+     {
+          map: {
+               image: "assets/map1.png",
+               mask: [ "97, 60, 39", "57, 35, 23", "0, 62, 0", "0, 79, 0", "18, 12, 7" ]
+          },
+          viewport: {
+               x: 0,
+               y: 60
+          },
+          jet: {
+               image: "assets/jet.png",
+               mask: [ "0, 0, 0" ],
+               x: 100,
+               y: 245
+          }
+     },
 
-     new Displayable({
-          image: "assets/map2.png",
-          mask: ["0, 0, 0"]
-     }),
+     {
+          map: {
+               image: "assets/map2.png",
+               mask: [ "0, 0, 0" ]
+          },
+          viewport: {
+               x: 0,
+               y: 50
+          },
+          jet: {
+               image: "assets/jet.png",
+               mask: [ "0, 0, 0" ],
+               x: 70,
+               y: 340
+          }
+     },
 
-     new Displayable({
-          image: "assets/map3.png",
-          mask: ["0, 0, 0"]
-     })
-
-     //todo more maps
+     {
+          map: {
+               image: "assets/map3.png",
+               mask: [ "0, 0, 0" ]
+          },
+          viewport: {
+               x: 0,
+               y: 50
+          },
+          jet: {
+               image: "assets/jet.png",
+               mask: [ "0, 0, 0" ],
+               x: 70,
+               y: 340
+          }
+     }
 
 ]
 
-var jet = new Displayable({
-     image: "assets/jet.png",
-     mask: ["0, 0, 0"],
-     x: 70,
-     y: 340, 
-     v: 0,
-     theta: 0
-})
 
-var viewport = {
-     x: 0,
-     y: 0
-}
+var viewport = {}
 
-for(var i = 0; i < maps.length; i++) {
+for(var i = 0; i < levelData.length; i++) {
 
      (function (i) {
 
           var level = i + 1
-          var map = maps[i]
+
+          var data = levelData[i]
+
+          var map = new Displayable(data.map)
+          var jet = new Displayable(data.jet)
+
 
           var startTime, //time this screen began 
               currentTime, //most recent render cycle
@@ -106,16 +134,43 @@ for(var i = 0; i < maps.length; i++) {
                     lastTime = lTime
 
                     //move viewport with jet
-                    viewport.x = jet.x - 100
+                    var targetViewportX = jet.x - 100
 
+                    var targetViewportY
                     if(jet.y < 300)
-                         viewport.y = 0
+                         targetViewportY = 0
                     else if(jet.y > map.height - 300)
-                         viewport.y = map.height - 600
+                         targetViewportY = map.height - 600
                     else
-                         viewport.y = jet.y - 300
+                         targetViewportY = jet.y - 300
 
-                    
+
+                    if(jetState !== "runway") {
+
+                         var shiftViewportX = (Math.abs(jet.v * Math.cos(jet.theta)) + 50) * (currentTime - lastTime) / 1000
+                         var shiftViewportY = (Math.abs(jet.v * Math.sin(jet.theta)) + 50) * (currentTime - lastTime) / 1000
+
+                         if(viewport.x < targetViewportX) {
+                              viewport.x = Math.min(targetViewportX, viewport.x + shiftViewportX)
+                         }
+                         else if(viewport.x > targetViewportX) {
+                              viewport.x = Math.max(targetViewportX, viewport.x - shiftViewportX)
+                         }
+
+                         if(viewport.y < targetViewportY) {
+                              viewport.y = Math.min(targetViewportY, viewport.y + shiftViewportY)
+                         }
+                         else if(viewport.y > targetViewportY) {
+                              viewport.y = Math.max(targetViewportY, viewport.y - shiftViewportY)
+                         }
+
+                    }
+                    else {
+
+                         viewport.x = data.viewport.x
+                         viewport.y = data.viewport.y
+                    }
+
 
 
                     var downState = ScrManager.keyStates["40"]
@@ -192,7 +247,7 @@ for(var i = 0; i < maps.length; i++) {
                init: function (sTime) {
 
                     startTime = sTime;
-                         
+
                     [jet, map].forEach(function (res) {
                          res.init()
                     })
