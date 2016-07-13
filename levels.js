@@ -210,7 +210,7 @@ for(var i = 0; i < levelData.length; i++) {
 
 
 
-                    if(jet.collidesWith(map) || jet.x <= 30) {
+                    if(jetState === "flying" && (jet.collidesWith(map) || jet.x <= 100) ) {
                          alert("bang")
 
                          ScrManager.setScr(thisScr)
