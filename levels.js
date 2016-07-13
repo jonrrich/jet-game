@@ -35,7 +35,7 @@ var levelData = [
      {
           map: {
                image: "assets/map1.png",
-               mask: [ "97, 60, 39", "57, 35, 23", "0, 62, 0", "0, 79, 0", "18, 12, 7" ]
+               maskRule: [ [97, 60, 39], [57, 35, 23], [0, 62, 0], [0, 79, 0], [18, 12, 7] ]
           },
           viewport: {
                x: 0,
@@ -43,7 +43,7 @@ var levelData = [
           },
           jet: {
                image: "assets/jet.png",
-               mask: [ "0, 0, 0" ],
+               maskRule: [ [0, 0, 0] ],
                x: 100,
                y: 245
           }
@@ -52,7 +52,7 @@ var levelData = [
      {
           map: {
                image: "assets/map2.png",
-               mask: [ "0, 0, 0" ]
+               maskRule: [ [0, 0, 0] ]
           },
           viewport: {
                x: 0,
@@ -60,7 +60,7 @@ var levelData = [
           },
           jet: {
                image: "assets/jet.png",
-               mask: [ "0, 0, 0" ],
+               maskRule: [ [0, 0, 0] ],
                x: 70,
                y: 340
           }
@@ -69,7 +69,7 @@ var levelData = [
      {
           map: {
                image: "assets/map3.png",
-               mask: [ "0, 0, 0" ]
+               maskRule: [ [0, 0, 0] ]
           },
           viewport: {
                x: 0,
@@ -77,7 +77,7 @@ var levelData = [
           },
           jet: {
                image: "assets/jet.png",
-               mask: [ "0, 0, 0" ],
+               maskRule: [ [0, 0, 0] ],
                x: 70,
                y: 340
           }
@@ -210,7 +210,7 @@ for(var i = 0; i < levelData.length; i++) {
 
 
 
-                    if(jetState === "flying" && (jet.collidesWith(map) || jet.x <= 100) ) {
+                    if(jetState === "flying" && jet.collidesWith(map)) {
                          alert("bang")
 
                          ScrManager.setScr(thisScr)
@@ -223,8 +223,6 @@ for(var i = 0; i < levelData.length; i++) {
                          ScrManager.setScr("level_select")
                     }
 
-
-                    lastTime = currentTime
                },
 
                oninput: function (type, e) {

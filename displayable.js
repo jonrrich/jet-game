@@ -42,7 +42,7 @@ Displayable.prototype = {
           this.isLoading = true
 
           var img = new Image()
-          img.src = this.image
+          img.src = this.config.image
 
           var thisDisplayable = this
 
@@ -50,28 +50,10 @@ Displayable.prototype = {
 
                thisDisplayable.image = img
 
-               if(!thisDisplayable.mask || thisDisplayable.mask.length === 0) {      //if no collision mask, no processing required.
-
-                    thisDisplayable.isLoading = false
-                    thisDisplayable.isLoaded = true
-
-                    thisDisplayable.mask = new Array(thisDisplayable.image.width)
-                                           .fill(1)    //<-- make iterable
-                                           .map(function () {
-                                               return new Array(thisDisplayable.image.height)
-                                               .fill(0) //<-- assume totally nonsolid
-                                           })
-
-                    thisDisplayable.loadCallbacks.forEach(function (cb) {
-                         cb()
-                    })
-
-                    return
-               }
-
-               var maskRule = thisDisplayable.mask.map(function (rule) {  //normalize rule string
-                    return rule.replace(/[^\d,]/g, "")
-               })
+               //thisDisplayable.maskRule = (thisDisplayable.config.maskRule || []).map(function (rule) {  //normalize rule string
+               //     return rule.replace(/[^\d,]/g, "")
+               //})
+               thisDisplayable.maskRule = thisDisplayable.config.maskRule || []
 
 
                //get data from image by drawing to offscreen canvas
@@ -84,34 +66,12 @@ Displayable.prototype = {
 
                offCtx.drawImage(img, 0, 0, img.width, img.height)
 
-               var imgData = offCtx.getImageData(0, 0, img.width, img.height).data
+               thisDisplayable.imageData = offCtx.getImageData(0, 0, img.width, img.height).data
 
-
-               //invoke webworker to process the image with the maskRule
-               //webworkers are used so that the main render loop doesn't hang while processing is in progress
-
-               //TODO: this takes longer than is probably necessary.
-
-               var processor = new Worker("img_processor.js")
-
-               processor.addEventListener("message", function (e) {  //when we recieve a message back, it's loaded.
-
-                    thisDisplayable.mask = e.data.mask
-
-                    thisDisplayable.isLoading = false
-                    thisDisplayable.isLoaded = true
-
-                    thisDisplayable.loadCallbacks.forEach(function (cb) {
-                         cb()
-                    })
-
-               }, false)
-
-               processor.postMessage({  //send initial message with args to start processing
-                    imgData: imgData,
-                    maskRule: maskRule,
-                    imgWidth: img.width,
-                    imgHeight: img.height
+               thisDisplayable.isLoaded = true
+               thisDisplayable.isLoading = false
+               thisDisplayable.loadCallbacks.forEach(function (cb) {
+                    cb()
                })
 
           }
@@ -133,20 +93,6 @@ Displayable.prototype = {
                jtheta: config.jtheta || 0,
                time: ScrManager.currentTime
           }
-     },
-
-
-     get image () {
-          return this.config.image
-     },
-     set image (image) {
-          this.config.image = image
-     },
-     get mask () {
-          return this.config.mask
-     },
-     set mask (mask) {
-          this.config.mask = mask
      },
 
 
@@ -297,6 +243,21 @@ Displayable.prototype = {
           }
      },
 
+     maskAt: function (x, y) {
+
+          if(x < 0 || x > this.image.width || y < 0 || y > this.image.height) return true
+
+          var index = (y * this.image.width + x) * 4
+          //var colorString = this.imageData[index] + "," + this.imageData[index + 1] + "," + this.imageData[index + 2]
+
+          //return this.maskRule.indexOf(colorString) >= 0
+
+          var idata = this.imageData
+
+          return this.maskRule.some(function (rule) {
+               return (idata[index] === rule[0] && idata[index + 1] === rule[1] && idata[index + 2] === rule[2])
+          })
+     },
 
      collidesWith: function(other) {
 
@@ -315,7 +276,7 @@ Displayable.prototype = {
           //"for each coordinate (i,j) in 'smaller' that is solid:"
           for(var i = 0; i < smaller.width; i++) {
                for(var j = 0; j < smaller.height; j++) {
-                    if(smaller.mask[i][j] !== 0) {
+                    if(smaller.maskAt(i, j)) {
 
 
                          //'i' and 'j' are coordinates relative to the top-left of 'smaller'
@@ -332,7 +293,7 @@ Displayable.prototype = {
 
 
                          //"if the coordinate relative to the top-left of 'larger' is also solid, collision."
-                         if(larger.mask[largerI][largerJ] !== 0) return true
+                         if(larger.maskAt(largerI, largerJ)) return true
                     }
                }
           }
