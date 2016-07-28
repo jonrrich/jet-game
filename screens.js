@@ -122,6 +122,8 @@ var ScrManager = {
 
                ScrManager.currentTime = time
 
+               Displayable.updateHooks(time)
+
                ScrManager.currentScr.render.call(ScrManager.currentScr, ScrManager.ctx, time, ScrManager.lastTime)
 
                ScrManager.lastTime = time

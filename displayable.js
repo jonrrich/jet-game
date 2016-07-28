@@ -5,11 +5,18 @@ var offCanv = document.createElement("canvas")
 var offCtx = offCanv.getContext("2d")
 
 
+var displayables = []
+
+
 function Displayable (config) {
      this.config = config
      this.isLoaded = false
      this.isLoading = false
      this.loadCallbacks = []  //functions to call on load
+     this.maskRule = this.config.maskRule || []
+     this.hooks = config.hooks || []
+
+     displayables.push(this)
 }
 
 Displayable.load = function (displayable, callback) {
@@ -23,6 +30,18 @@ Displayable.loadAll = function (displayables, callback) {
           d.load(function () {
                count++
                if(callback && count === displayables.length) callback()
+          })
+     })
+}
+
+Displayable.updateHooks = function (time) {
+
+     displayables.forEach(function (displayable) {
+
+          displayable.hooks.forEach(function (hook) {
+
+               if(hook.condition(time))
+                    hook.run(time)
           })
      })
 }
@@ -53,7 +72,6 @@ Displayable.prototype = {
                //thisDisplayable.maskRule = (thisDisplayable.config.maskRule || []).map(function (rule) {  //normalize rule string
                //     return rule.replace(/[^\d,]/g, "")
                //})
-               thisDisplayable.maskRule = thisDisplayable.config.maskRule || []
 
 
                //get data from image by drawing to offscreen canvas
